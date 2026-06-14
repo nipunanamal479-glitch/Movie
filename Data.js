@@ -1,7 +1,7 @@
 const movies = [
     {
         "id": 1,
-        "title": "Avatar: Fire and Ash",
+        "title": "යම රජ සිරි",
         "image": "pI7C8jr0beI-HD.jpg",
         "link": "https://google.com"
     },
