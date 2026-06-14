@@ -1,4 +1,4 @@
-// සරල සිංග්ලිෂ් මැපින් එකක්
+// සිංග්ලිෂ් මැපින් එක (ඔයාට අවශ්‍ය අකුරු තව වැඩි කරගන්න පුළුවන්)
 const sinhalaMap = {
     'ය': 'ya', 'ම': 'ma', 'ර': 'ra', 'ජ': 'ja', 'ස': 'sa', 'ව': 'va', 'ද': 'da', 'ප': 'pa', 'න': 'na', 'වී': 'vee', 'දි': 'di', 'හි': 'hi'
 };
@@ -12,21 +12,36 @@ function toSinglish(text) {
 }
 
 function fuzzyMatch(str, query) {
-    // 1. Query එක සිංහල නම් ඒක සිංග්ලිෂ් වලට හරවන්න
-    let convertedQuery = toSinglish(query);
-    
+    // සර්ච් කරන දේ ඉංග්‍රීසි අකුරු වලට හරවගන්නවා
+    let convertedQuery = toSinglish(query).toLowerCase();
     str = str.toLowerCase();
-    query = convertedQuery.toLowerCase();
     
-    // ... කලින් තිබ්බ fuzzy logic එක මෙතන දාන්න ...
+    // Fuzzy logic matrix එක
     let matrix = [];
     for(let i = 0; i <= str.length; i++) matrix[i] = [i];
-    for(let j = 0; j <= query.length; j++) matrix[0][j] = j;
+    for(let j = 0; j <= convertedQuery.length; j++) matrix[0][j] = j;
+
     for(let i = 1; i <= str.length; i++) {
-        for(let j = 1; j <= query.length; j++) {
-            let cost = (str[i-1] == query[j-1]) ? 0 : 1;
-            matrix[i][j] = Math.min(matrix[i-1][j] + 1, matrix[i][j-1] + 1, matrix[i-1][j-1] + cost);
+        for(let j = 1; j <= convertedQuery.length; j++) {
+            let cost = (str[i-1] == convertedQuery[j-1]) ? 0 : 1;
+            matrix[i][j] = Math.min(
+                matrix[i-1][j] + 1,
+                matrix[i][j-1] + 1,
+                matrix[i-1][j-1] + cost
+            );
         }
     }
-    return matrix[str.length][query.length] <= 3; 
+    // මෙතන අකුරු 3ක වෙනසක් දක්වා අවසර දෙනවා
+    return matrix[str.length][convertedQuery.length] <= 3; 
+}
+
+function filterMovies() {
+    const query = document.getElementById('search').value.toLowerCase();
+    if (!query) { renderMovies(movies); return; }
+    
+    // සර්ච් එක හරියටම මැච් වෙනවද නැත්නම් Fuzzy විදියට මැච් වෙනවද කියලා බලනවා
+    const filtered = movies.filter(m => 
+        m.title.toLowerCase().includes(query) || fuzzyMatch(m.title, query)
+    );
+    renderMovies(filtered);
 }
