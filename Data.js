@@ -1,12 +1,14 @@
 const movies = [
     {
+        "id": 1,
         "title": "Avatar: Fire and Ash",
-        "image": "https://upload.wikimedia.org/wikipedia/en/b/b0/Avatar_The_Way_of_Water_poster.jpg",
+        "image": "images/avatar.jpg",
         "link": "https://google.com"
     },
     {
+        "id": 2,
         "title": "Dridam (2026)",
-        "image": "e18b6624-d25e-4304-b079-d1877c56a228.jpeg",
+        "image": "images/dridam.jpg",
         "link": "https://google.com"
     }
 ];
