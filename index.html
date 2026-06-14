@@ -15,10 +15,13 @@
         @keyframes rotate { 100% { transform: rotate(360deg); } }
         
         .bubble-card { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.4s; }
-        .bubble-card:hover { border: 1px solid #e50914; transform: translateY(-8px); }
+        .bubble-card:hover { border: 1px solid #e50914; transform: scale(1.05); }
 
         .slow-popup { transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; transform: scale(0.5); visibility: hidden; }
         .slow-popup.show { opacity: 1; transform: scale(1); visibility: visible; }
+        
+        /* Slow Download Button Effect */
+        .btn-download { transition: all 1.5s ease-in-out; }
     </style>
 </head>
 <body class="bg-black text-white">
@@ -48,37 +51,38 @@
 
             return (
                 <div>
-                    <div className="bg-black p-8 text-center border-b border-red-900">
+                    <div className="bg-black p-8 border-b border-red-900 flex justify-between items-center px-10">
                         <h1 className="text-4xl font-black text-red-600 tracking-tighter uppercase">SL CINEMA</h1>
                         
-                        {/* Search Icon & Box */}
-                        <div className="mt-6 flex justify-center items-center gap-2">
-                            <button className="text-red-600 text-3xl transition-transform hover:scale-110" onClick={() => setIsOpen(!isOpen)}>🔍</button>
+                        {/* Search Icon & Box - දකුණු පැත්තට */}
+                        <div className="flex items-center gap-4">
                             <input 
                                 className={`bg-[#111] border border-red-900 rounded-full px-6 py-3 outline-none transition-all duration-700 ease-in-out ${isOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 px-0'}`}
                                 placeholder="සෙවීම..." 
                                 onChange={(e) => setSearch(e.target.value)} 
                             />
+                            <button className="text-red-600 text-3xl transition-transform hover:scale-110" onClick={() => setIsOpen(!isOpen)}>🔍</button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto p-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto p-10">
                         {filtered.map(m => (
-                            <div key={m.id} className="bubble-card p-4 rounded-2xl cursor-pointer" onClick={() => setSelected(m)}>
-                                <img src={m.image} className="w-full h-40 object-cover rounded-xl" onError={(e) => e.target.src='https://via.placeholder.com/300'} />
-                                <h3 className="text-center mt-4 font-bold text-sm">{m.title}</h3>
+                            <div key={m.id} className="bubble-card p-6 rounded-3xl cursor-pointer min-h-[300px]" onClick={() => setSelected(m)}>
+                                <img src={m.image} className="w-full h-56 object-cover rounded-2xl" onError={(e) => e.target.src='https://via.placeholder.com/300'} />
+                                <h3 className="text-center mt-6 font-bold text-lg">{m.title}</h3>
                             </div>
                         ))}
                     </div>
 
                     {selected && (
-                        <div className={`fixed inset-0 bg-black/90 flex justify-center items-center p-6 z-50 slow-popup show`} onClick={() => setSelected(null)}>
-                            <div className="bg-[#111] p-8 rounded-3xl w-full max-w-sm border border-red-900 shadow-2xl" onClick={e => e.stopPropagation()}>
-                                <img src={selected.image} className="w-full rounded-2xl" />
-                                <h2 className="text-2xl font-bold mt-4">{selected.title}</h2>
-                                <p className="text-gray-400 mt-2">{selected.description}</p>
-                                <a href={selected.link} className="block w-full mt-8 bg-red-600 py-4 rounded-xl font-black text-center transition-all duration-700 hover:scale-105 hover:bg-red-700">Download Now</a>
-                                <button className="w-full mt-4 text-gray-500 hover:text-white" onClick={() => setSelected(null)}>Close</button>
+                        <div className={`fixed inset-0 bg-black/95 flex justify-center items-center p-6 z-50 slow-popup show`} onClick={() => setSelected(null)}>
+                            <div className="bg-[#111] p-10 rounded-[3rem] w-full max-w-md border border-red-900 shadow-2xl" onClick={e => e.stopPropagation()}>
+                                <img src={selected.image} className="w-full rounded-3xl h-64 object-cover" />
+                                <h2 className="text-3xl font-bold mt-6">{selected.title}</h2>
+                                <p className="text-gray-400 mt-3 text-lg">{selected.description}</p>
+                                {/* Slow Download Button */}
+                                <a href={selected.link} className="btn-download block w-full mt-10 bg-red-600 py-5 rounded-2xl font-black text-center hover:bg-white hover:text-red-600">Download Now</a>
+                                <button className="w-full mt-5 text-gray-500 hover:text-white" onClick={() => setSelected(null)}>Close</button>
                             </div>
                         </div>
                     )}
