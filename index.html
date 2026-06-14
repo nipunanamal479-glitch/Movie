@@ -3,46 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLCinema - Movies</title>
+    <title>SL CINEMA - Movies</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        body { margin: 0; background-color: #050505; color: white; font-family: 'Poppins', sans-serif; }
         
-        /* Navbar & Search */
-        .navbar { background: #111; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .search-container { background: #222; padding: 10px; border-radius: 20px; }
-        .search-container input { background: transparent; border: none; color: #fff; outline: none; }
+        /* Loading Animation */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #222; border-top: 5px solid #e50914; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Movie Grid */
-        .container { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 20px; }
-        .card { background: #1a1a1a; border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.3s; }
-        .card:hover { transform: scale(1.05); }
-        .card img { width: 100%; height: 230px; object-fit: cover; }
-        
+        /* Navbar */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: #000; position: sticky; top: 0; z-index: 10; }
+        .logo { font-family: 'Bebas Neue', cursive; color: #e50914; font-size: 40px; cursor: pointer; letter-spacing: 2px; }
+        .search-bar { padding: 10px 15px; border-radius: 20px; border: none; width: 200px; background: #1a1a1a; color: white; }
+
+        /* Grid */
+        .container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; }
+        .card { background: #111; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.3s; border: 1px solid #222; }
+        .card:hover { transform: scale(1.02); border-color: #e50914; }
+        .card img { width: 100%; height: 200px; object-fit: cover; display: block; }
+        .card h3 { padding: 8px; font-size: 14px; text-align: center; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
         /* Popup Animation */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        .download-btn { display: block; background: #e50914; padding: 15px; color: #fff; text-decoration: none; border-radius: 10px; margin-top: 20px; font-weight: bold; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.4s ease; }
+        .modal-content { background: #111; padding: 30px; border-radius: 20px; text-align: center; width: 80%; max-width: 400px; transform: scale(0.8); transition: transform 0.4s ease; }
+        .btn-download { display: inline-block; background: #e50914; color: white; padding: 15px 40px; text-decoration: none; border-radius: 10px; margin-top: 20px; opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
     </style>
 </head>
-<body>
+<body onload="hideLoader()">
+
+    <div id="loader"><div class="spinner"></div></div>
 
     <div class="navbar">
-        <h2 onclick="location.reload()" style="cursor:pointer;">SLCinema</h2>
-        <div class="search-container">
-            <input type="text" placeholder="Search Movies...">
-        </div>
+        <div class="logo" onclick="location.reload()">SL CINEMA</div>
+        <input type="text" id="searchInput" class="search-bar" placeholder="සෙවීම..." onkeyup="filterMovies()">
     </div>
 
     <div class="container" id="movie-list"></div>
 
     <div id="myModal" class="modal">
         <div class="modal-content">
-            <span onclick="closeModal()" style="float:right; cursor:pointer;">&times;</span>
-            <img id="m-img" src="" style="width:100%; border-radius:10px;">
             <h2 id="m-title"></h2>
-            <a id="m-link" href="#" class="download-btn">Download Now</a>
+            <a id="m-link" href="#" class="btn-download">Download Movie</a>
+            <p onclick="closeModal()" style="cursor:pointer; margin-top:20px; color:#888;">Close</p>
         </div>
     </div>
 
@@ -52,19 +56,47 @@
         movies.forEach(m => {
             list.innerHTML += `
                 <div class="card" onclick="openMovie(${m.id})">
-                    <img src="${m.image}">
-                    <h3 style="font-size:14px; padding:5px;">${m.title}</h3>
+                    <img src="${m.image}" alt="${m.title}">
+                    <h3>${m.title}</h3>
                 </div>`;
         });
 
+        function hideLoader() { document.getElementById("loader").style.display = "none"; }
+
+        function filterMovies() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(card => {
+                card.style.display = card.innerText.toLowerCase().includes(input) ? "" : "none";
+            });
+        }
+
         function openMovie(id) {
             const m = movies.find(x => x.id == id);
-            document.getElementById("m-img").src = m.image;
             document.getElementById("m-title").innerText = m.title;
             document.getElementById("m-link").href = m.link;
-            document.getElementById("myModal").style.display = "flex";
+            
+            const modal = document.getElementById("myModal");
+            modal.style.display = "flex";
+            
+            setTimeout(() => {
+                modal.style.opacity = "1";
+                modal.querySelector(".modal-content").style.transform = "scale(1)";
+                setTimeout(() => {
+                    const btn = document.querySelector(".btn-download");
+                    btn.style.opacity = "1";
+                    btn.style.transform = "translateY(0)";
+                }, 300);
+            }, 10);
         }
-        function closeModal() { document.getElementById("myModal").style.display = "none"; }
+
+        function closeModal() {
+            const modal = document.getElementById("myModal");
+            modal.style.opacity = "0";
+            modal.querySelector(".modal-content").style.transform = "scale(0.8)";
+            document.querySelector(".btn-download").style.opacity = "0";
+            
+            setTimeout(() => { modal.style.display = "none"; }, 400);
+        }
     </script>
 </body>
 </html>
