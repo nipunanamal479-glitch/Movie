@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <title>SLCinema</title>
+    <!-- ඔයාගේ CSS මෙතන -->
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; }
+        .navbar { background: #1a1a1a; padding: 20px; text-align: center; border-bottom: 3px solid #ff0000; }
+        .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+        .card { background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center; }
+        .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 5px; }
+        .card a { display: block; background: #ff0000; color: #fff; padding: 10px; text-decoration: none; border-radius: 5px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="navbar"><h1>SLCinema</h1></div>
+    <div class="container" id="movie-list"></div>
+
+    <!-- මේ තමයි වැදගත්ම ටික -->
+    <script src="Data.js"></script> 
+    <script>
+        const list = document.getElementById('movie-list');
+        movies.forEach(m => {
+            list.innerHTML += `
+                <div class="card">
+                    <img src="${m.image}" alt="Poster">
+                    <h3>${m.title}</h3>
+                    <a href="${m.link}">Download</a>
+                </div>`;
+        });
+    </script>
+</body>
+</html>
