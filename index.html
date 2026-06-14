@@ -8,13 +8,17 @@
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; }
         .navbar { background: #1a1a1a; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff0000; }
         .menu a { color: #fff; margin-left: 15px; text-decoration: none; font-size: 14px; }
-        .container { padding: 20px; }
-        .card { background: #1a1a1a; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
-        .card img { width: 100%; height: 250px; object-fit: cover; border-radius: 8px; }
-        .btn { display: block; background: #ff0000; color: #fff; padding: 12px; text-align: center; text-decoration: none; border-radius: 5px; margin-top: 10px; }
         
-        /* මූවි පිටුව පෙන්වන style එක */
-        #movie-page { display: none; padding: 20px; }
+        .container { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .card { background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .card:hover { transform: scale(1.05); }
+        .card img { width: 100%; height: 200px; object-fit: cover; border-radius: 5px; }
+        
+        /* Popup (Modal) Style */
+        .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; animation: zoom 0.3s; }
+        @keyframes zoom { from { transform: scale(0.8); } to { transform: scale(1); } }
+        .btn { display: block; background: #ff0000; color: #fff; padding: 12px; text-decoration: none; border-radius: 5px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -22,54 +26,44 @@
     <div class="navbar">
         <h2>SLCinema</h2>
         <div class="menu">
-            <a href="#" onclick="showHome()">Home</a>
+            <a href="#">Home</a>
             <a href="#">Latest</a>
-            <a href="#">Categories</a>
         </div>
     </div>
 
-    <!-- ප්‍රධාන පිටුව -->
-    <div class="container" id="home-page">
-        <div id="movie-list"></div>
-    </div>
+    <div class="container" id="movie-list"></div>
 
-    <!-- මූවි විස්තර පිටුව -->
-    <div id="movie-page">
-        <button onclick="showHome()" style="background:none; color:#fff; border:1px solid #fff; padding:5px;">Back</button>
-        <h2 id="m-title"></h2>
-        <img id="m-img" src="" style="width:100%; border-radius:10px;">
-        <p>මේ මූවි එකේ විස්තර මෙතනින් පෙන්වන්න පුළුවන්.</p>
-        <a id="m-link" href="#" class="btn">Download Now</a>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
+            <img id="modal-img" src="" style="width:100%; height:300px; object-fit:cover; border-radius:10px;">
+            <h2 id="modal-title"></h2>
+            <a id="modal-link" href="#" class="btn">Download Now</a>
+        </div>
     </div>
 
     <script src="Data.js"></script>
     <script>
         const list = document.getElementById('movie-list');
-        const homePage = document.getElementById('home-page');
-        const moviePage = document.getElementById('movie-page');
-
-        function showHome() {
-            homePage.style.display = 'block';
-            moviePage.style.display = 'none';
-        }
-
-        function openMovie(id) {
-            const m = movies.find(x => x.id == id);
-            document.getElementById('m-title').innerText = m.title;
-            document.getElementById('m-img').src = m.image;
-            document.getElementById('m-link').href = m.link;
-            homePage.style.display = 'none';
-            moviePage.style.display = 'block';
-        }
+        const modal = document.getElementById('myModal');
 
         movies.forEach(m => {
             list.innerHTML += `
-                <div class="card">
+                <div class="card" onclick="openMovie(${m.id})">
                     <img src="${m.image}">
-                    <h3>${m.title}</h3>
-                    <a href="#" class="btn" onclick="openMovie(${m.id})">Download</a>
+                    <p>${m.title}</p>
                 </div>`;
         });
+
+        function openMovie(id) {
+            const m = movies.find(x => x.id == id);
+            document.getElementById("modal-img").src = m.image;
+            document.getElementById("modal-title").innerText = m.title;
+            document.getElementById("modal-link").href = m.link;
+            modal.style.display = "flex";
+        }
+
+        function closeModal() { modal.style.display = "none"; }
     </script>
 </body>
 </html>
