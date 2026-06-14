@@ -2,89 +2,107 @@
 <html lang="si">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL CINEMA</title>
+    <title>SL CINEMA PRO</title>
+    <!-- Data එක මුලින්ම load වෙන්න -->
+    <script src="Data.js"></script>
+    
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; background: #050505; color: white; font-family: sans-serif; }
-        .navbar { padding: 20px; background: #000; text-align: center; color: #e50914; font-size: 24px; font-weight: bold; }
+        .flower-loader { width: 50px; height: 50px; position: relative; animation: rotate 2s linear infinite; }
+        .petal { position: absolute; width: 100%; height: 100%; top: 0; left: 0; }
+        .petal::after { content: ''; display: block; width: 12px; height: 12px; background: #e50914; border-radius: 50%; margin: 0 auto; }
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
         
-        .search-container { padding: 15px 20px; background: #000; display: flex; justify-content: flex-end; align-items: center; }
-        .search-box { 
-            width: 0; padding: 0; border: none; border-radius: 20px; background: #111; color: white;
-            transition: width 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), padding 0.5s; overflow: hidden;
-        }
-        .search-box.active { width: 180px; padding: 10px 15px; border: 1px solid #e50914; margin-right: 10px; }
-        .search-icon { font-size: 24px; cursor: pointer; color: #e50914; transition: 0.3s; margin-right: 10px; }
-        
-        .container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
-        
-        /* කාඩ් ඇනිමේෂන් */
-        .card { 
-            background: #111; border-radius: 10px; overflow: hidden; cursor: pointer;
-            border: 1px solid #222; animation: pulseMax 3s infinite;
-        }
-        @keyframes pulseMax { 0%, 100% { box-shadow: 0 0 10px rgba(229, 9, 20, 0.3); } 50% { box-shadow: 0 0 25px rgba(229, 9, 20, 0.6); } }
-        .card:hover { border-color: #e50914; transform: scale(1.05); }
-        
-        .card img { width: 100%; height: 120px; object-fit: cover; }
-        .card h3 { text-align: center; font-size: 10px; margin: 5px 0; }
-        
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 90%; max-width: 350px; }
-        .btn-download { display: block; background: #e50914; text-align: center; color: white; padding: 12px; text-decoration: none; border-radius: 8px; margin-top: 15px; }
+        .bubble-card { background: rgba(17, 17, 17, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.4s ease; }
+        .bubble-card:hover { background: rgba(229, 9, 20, 0.1); border: 1px solid #e50914; box-shadow: 0 8px 32px 0 rgba(229, 9, 20, 0.3); transform: translateY(-5px); }
+
+        .popup-overlay { transition: opacity 0.7s ease-in-out; opacity: 0; visibility: hidden; }
+        .popup-overlay.show { opacity: 1; visibility: visible; }
+        .popup-box { transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0); }
+        .popup-box.show { transform: scale(1); }
     </style>
 </head>
-<body>
+<body class="bg-[#050505] text-white">
 
-    <div class="navbar">SL CINEMA</div>
-    
-    <div class="search-container">
-        <input type="text" class="search-box" placeholder="සෙවීම..." id="search" onkeyup="filterMovies()">
-        <span class="search-icon" onclick="toggleSearch()">🔍</span>
-    </div>
+    <div id="root"></div>
 
-    <div class="container" id="movie-list"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-    <div id="myModal" class="modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <img id="m-img" src="" style="width:100%; border-radius:10px;">
-            <h2 id="m-title"></h2>
-            <p id="m-desc" style="color:#aaa;"></p>
-            <a id="m-link" href="#" class="btn-download" download>Download</a>
-        </div>
-    </div>
+        function App() {
+            const [selected, setSelected] = useState(null);
+            const [search, setSearch] = useState("");
+            const [isSearchOpen, setIsSearchOpen] = useState(false);
+            const [loading, setLoading] = useState(true);
+            const [showPopup, setShowPopup] = useState(false);
+            const [movieData, setMovieData] = useState([]);
 
-    <script src="Data.js"></script>
-    <script src="search.js"></script>
+            useEffect(() => {
+                // කෙලින්ම window.movies තියෙනවද බලනවා
+                if (window.movies) {
+                    setMovieData(window.movies);
+                    setLoading(false);
+                } else {
+                    // නැත්නම් පොඩි වෙලාවක් බලන් ඉන්නවා
+                    setTimeout(() => {
+                        setMovieData(window.movies || []);
+                        setLoading(false);
+                    }, 500);
+                }
+            }, []);
 
-    <script>
-        function toggleSearch() { document.getElementById('search').classList.toggle('active'); }
-        
-        const list = document.getElementById('movie-list');
-        function renderMovies(arr) {
-            list.innerHTML = "";
-            arr.forEach(m => {
-                list.innerHTML += `
-                    <div class="card" onclick="openMovie(${m.id})">
-                        <img src="${m.image}" alt="">
-                        <h3>${m.title}</h3>
-                    </div>`;
-            });
+            const openPopup = (m) => { setSelected(m); setTimeout(() => setShowPopup(true), 50); };
+            const closePopup = () => { setShowPopup(false); setTimeout(() => setSelected(null), 700); };
+
+            if (loading) return (
+                <div className="h-screen flex justify-center items-center">
+                    <div className="flower-loader">
+                        {[...Array(8)].map((_, i) => <div key={i} className="petal" style={{ transform: `rotate(${i * 45}deg)` }}></div>)}
+                    </div>
+                </div>
+            );
+
+            const filtered = movieData.filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
+
+            return (
+                <div className="min-h-screen">
+                    <div className="bg-black p-6 text-center border-b border-red-600 text-red-600 text-3xl font-bold uppercase">SL CINEMA</div>
+                    
+                    <div className="flex justify-end p-4 items-center gap-3 max-w-4xl mx-auto">
+                        <input className={`bg-gray-900 border border-red-600 text-white p-2 rounded-full transition-all duration-500 ${isSearchOpen ? 'w-48 px-4' : 'w-0 px-0 opacity-0'}`}
+                            placeholder="සෙවීම..." onChange={(e) => setSearch(e.target.value)} />
+                        <button className="text-red-600 text-2xl" onClick={() => setIsSearchOpen(!isSearchOpen)}>🔍</button>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 p-4 max-w-4xl mx-auto">
+                        {filtered.map(m => (
+                            <div key={m.id} className="bubble-card p-3 rounded-2xl cursor-pointer" onClick={() => openPopup(m)}>
+                                <img src={m.image} className="w-full h-32 object-cover rounded-xl" />
+                                <h3 className="text-center mt-2 text-xs font-semibold">{m.title}</h3>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className={`fixed inset-0 bg-black/90 flex justify-center items-center p-4 z-50 popup-overlay ${selected ? 'show' : ''}`} onClick={closePopup}>
+                        {selected && (
+                            <div className={`bg-[#1a1a1a] p-6 rounded-2xl w-full max-w-sm border border-red-600 popup-box ${showPopup ? 'show' : ''}`} onClick={e => e.stopPropagation()}>
+                                <img src={selected.image} className="w-full rounded-lg" />
+                                <h2 className="text-xl font-bold mt-4">{selected.title}</h2>
+                                <p className="text-gray-400 mt-2 text-sm">{selected.description}</p>
+                                <a href={selected.link} className="block bg-red-600 text-center p-3 rounded-lg mt-6 font-bold hover:shadow-[0_0_15px_#e50914] transition duration-700">Download Now</a>
+                                <button className="w-full mt-3 text-gray-500" onClick={closePopup}>Close</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
         }
 
-        function openMovie(id) {
-            const m = movies.find(x => x.id == id);
-            document.getElementById("m-title").innerText = m.title;
-            document.getElementById("m-img").src = m.image;
-            document.getElementById("m-desc").innerText = m.description;
-            document.getElementById("m-link").href = m.link;
-            document.getElementById("myModal").classList.add("active");
-        }
-        function closeModal() { document.getElementById("myModal").classList.remove("active"); }
-
-        // පේජ් එක ලෝඩ් වෙද්දීම මූවි ටික පෙන්වන්න
-        window.onload = () => renderMovies(movies);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
