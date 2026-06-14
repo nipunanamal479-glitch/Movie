@@ -2,7 +2,7 @@ const movies = [
     {
         "id": 1,
         "title": "Avatar: Fire and Ash",
-        "image": "https://imgur.com/a/r3OxALB",
+        "image": "pI7C8jr0beI-HD.jpg",
         "link": "https://google.com"
     },
     {
