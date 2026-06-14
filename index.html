@@ -8,15 +8,20 @@
         body { margin: 0; background: #050505; color: white; font-family: sans-serif; }
         .navbar { padding: 20px; background: #000; text-align: center; color: #e50914; font-size: 24px; font-weight: bold; }
         
-        .search-container { padding: 15px 20px; background: #000; display: flex; justify-content: flex-end; align-items: center; }
+        /* Search container */
+        .search-container { 
+            padding: 15px 20px; background: #000; 
+            display: flex; justify-content: flex-end; align-items: center; 
+        }
         .search-box { 
             width: 0; padding: 0; border: none; border-radius: 20px; background: #111; color: white;
             transition: width 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), padding 0.5s; overflow: hidden;
         }
         .search-box.active { width: 180px; padding: 10px 15px; border: 1px solid #e50914; margin-right: 10px; }
-        .search-icon { font-size: 24px; cursor: pointer; color: #e50914; transition: 0.3s; }
+        .search-icon { font-size: 24px; cursor: pointer; color: #e50914; transition: 0.3s; margin-right: 10px;}
         .search-icon:hover { transform: rotate(90deg) scale(1.2); }
 
+        /* කාඩ්ස් සහ ඇනිමේෂන් */
         .container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
         .card { 
             background: #111; border-radius: 10px; overflow: hidden; cursor: pointer;
@@ -55,13 +60,9 @@
         </div>
     </div>
 
-    <script>
-        // අලුත් මූවි එකක් එකතු කරන්න ඕනේ නම් මේ ලිස්ට් එකට පහළින් පේළියක් එකතු කරන්න
-        const movies = [
-            { "id": 1, "title": "යම රාජ සිරි Yamaraja Siri", "image": "https://via.placeholder.com/150", "description": "මේක යම රාජ සිරි මූවි එකේ විස්තරයයි.", "link": "#" },
-            { "id": 2, "title": "වීදි පහන Veedi Pahana", "image": "https://via.placeholder.com/150", "description": "වීදි පහන මූවි එකේ විස්තරය.", "link": "#" }
-        ];
+    <script src="Data.js"></script>
 
+    <script>
         function toggleSearch() { document.getElementById('search').classList.toggle('active'); }
 
         // Fuzzy Search Logic
@@ -79,6 +80,7 @@
             return matrix[str.length][query.length] <= 3; 
         }
 
+        // Search Filter
         function filterMovies() {
             const query = document.getElementById('search').value.toLowerCase();
             const filtered = movies.filter(m => m.title.toLowerCase().includes(query) || fuzzyMatch(m.title, query));
@@ -107,6 +109,7 @@
         }
         function closeModal() { document.getElementById("myModal").classList.remove("active"); }
 
+        // මුලින්ම ඔක්කොම මූවි ටික පෙන්වන්න
         renderMovies(movies);
     </script>
 </body>
