@@ -1,7 +1,7 @@
 const movies = [
     {
         "id": 1,
-        "title": "යම රජ සිරි",
+        "title": "Yamaraja siri",
         "image": "pI7C8jr0beI-HD.jpg",
         "link": "https://google.com"
     },
