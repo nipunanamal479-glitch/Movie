@@ -8,36 +8,31 @@
         body { margin: 0; background: #050505; color: white; font-family: sans-serif; }
         .navbar { padding: 20px; background: #000; text-align: center; color: #e50914; font-size: 24px; font-weight: bold; }
         
-        /* Search container */
-        .search-container { 
-            padding: 15px 20px; background: #000; 
-            display: flex; justify-content: flex-end; align-items: center; 
-        }
+        .search-container { padding: 15px 20px; background: #000; display: flex; justify-content: flex-end; align-items: center; }
         .search-box { 
             width: 0; padding: 0; border: none; border-radius: 20px; background: #111; color: white;
             transition: width 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), padding 0.5s; overflow: hidden;
         }
         .search-box.active { width: 180px; padding: 10px 15px; border: 1px solid #e50914; margin-right: 10px; }
-        .search-icon { font-size: 24px; cursor: pointer; color: #e50914; transition: 0.3s; margin-right: 10px;}
-        .search-icon:hover { transform: rotate(90deg) scale(1.2); }
-
-        /* කාඩ්ස් සහ ඇනිමේෂන් */
+        .search-icon { font-size: 24px; cursor: pointer; color: #e50914; transition: 0.3s; margin-right: 10px; }
+        
         .container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
+        
+        /* කාඩ් ඇනිමේෂන් */
         .card { 
             background: #111; border-radius: 10px; overflow: hidden; cursor: pointer;
-            border: 1px solid #222; transition: 0.3s; animation: pulseMax 3s infinite;
+            border: 1px solid #222; animation: pulseMax 3s infinite;
         }
         @keyframes pulseMax { 0%, 100% { box-shadow: 0 0 10px rgba(229, 9, 20, 0.3); } 50% { box-shadow: 0 0 25px rgba(229, 9, 20, 0.6); } }
-        .card:hover { animation: pulseGlowMax 1s infinite; border-color: #e50914; transform: scale(1.05); }
-        @keyframes pulseGlowMax { 0%, 100% { box-shadow: 0 0 10px rgba(229, 9, 20, 0.4); } 50% { box-shadow: 0 0 40px rgba(229, 9, 20, 1); } }
+        .card:hover { border-color: #e50914; transform: scale(1.05); }
         
         .card img { width: 100%; height: 120px; object-fit: cover; }
         .card h3 { text-align: center; font-size: 10px; margin: 5px 0; }
         
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
         .modal.active { display: flex; }
-        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; }
-        .btn-download { display: block; background: #e50914; color: white; padding: 12px; text-decoration: none; border-radius: 8px; margin-top: 15px; font-weight: bold; }
+        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 90%; max-width: 350px; }
+        .btn-download { display: block; background: #e50914; text-align: center; color: white; padding: 12px; text-decoration: none; border-radius: 8px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -61,32 +56,11 @@
     </div>
 
     <script src="Data.js"></script>
+    <script src="search.js"></script>
 
     <script>
         function toggleSearch() { document.getElementById('search').classList.toggle('active'); }
-
-        // Fuzzy Search Logic
-        function fuzzyMatch(str, query) {
-            str = str.toLowerCase(); query = query.toLowerCase();
-            let matrix = [];
-            for(let i = 0; i <= str.length; i++) matrix[i] = [i];
-            for(let j = 0; j <= query.length; j++) matrix[0][j] = j;
-            for(let i = 1; i <= str.length; i++) {
-                for(let j = 1; j <= query.length; j++) {
-                    let cost = (str[i-1] == query[j-1]) ? 0 : 1;
-                    matrix[i][j] = Math.min(matrix[i-1][j] + 1, matrix[i][j-1] + 1, matrix[i-1][j-1] + cost);
-                }
-            }
-            return matrix[str.length][query.length] <= 3; 
-        }
-
-        // Search Filter
-        function filterMovies() {
-            const query = document.getElementById('search').value.toLowerCase();
-            const filtered = movies.filter(m => m.title.toLowerCase().includes(query) || fuzzyMatch(m.title, query));
-            renderMovies(filtered);
-        }
-
+        
         const list = document.getElementById('movie-list');
         function renderMovies(arr) {
             list.innerHTML = "";
@@ -109,8 +83,8 @@
         }
         function closeModal() { document.getElementById("myModal").classList.remove("active"); }
 
-        // මුලින්ම ඔක්කොම මූවි ටික පෙන්වන්න
-        renderMovies(movies);
+        // පේජ් එක ලෝඩ් වෙද්දීම මූවි ටික පෙන්වන්න
+        window.onload = () => renderMovies(movies);
     </script>
 </body>
 </html>
