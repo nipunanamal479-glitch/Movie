@@ -15,10 +15,11 @@
         @keyframes rotate { 100% { transform: rotate(360deg); } }
         
         .bubble-card { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.4s; }
-        .bubble-card:hover { border: 1px solid #e50914; transform: translateY(-8px); box-shadow: 0 10px 20px rgba(229, 9, 20, 0.2); }
-        
-        .popup-overlay { transition: 0.5s; opacity: 0; visibility: hidden; }
-        .popup-overlay.show { opacity: 1; visibility: visible; }
+        .bubble-card:hover { border: 1px solid #e50914; transform: translateY(-8px); }
+
+        /* Slow Bounce Popup */
+        .slow-popup { transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; transform: scale(0.5); visibility: hidden; }
+        .slow-popup.show { opacity: 1; transform: scale(1); visibility: visible; }
     </style>
 </head>
 <body class="bg-black text-white">
@@ -29,45 +30,51 @@
 
         function App() {
             const [selected, setSelected] = useState(null);
+            const [search, setSearch] = useState("");
             const [loading, setLoading] = useState(true);
+            const [isOpen, setIsOpen] = useState(false);
 
-            useEffect(() => {
-                // දත්ත තියෙනවද කියලා බලලා පස්සේ load කරන්න
-                const timer = setTimeout(() => setLoading(false), 1500);
-                return () => clearTimeout(timer);
-            }, []);
+            useEffect(() => { setTimeout(() => setLoading(false), 1500); }, []);
 
             if (loading) return (
                 <div className="h-screen flex flex-col justify-center items-center bg-black">
                     <div className="flower-loader">
                         {[...Array(8)].map((_, i) => <div key={i} className="petal" style={{ transform: `rotate(${i * 45}deg)` }}></div>)}
                     </div>
-                    <p className="mt-8 text-red-600 font-bold animate-pulse">සිනමාව ලෝඩ් වෙමින්...</p>
+                    <p className="mt-8 text-red-600 font-bold tracking-widest">SL CINEMA LOADING...</p>
                 </div>
             );
 
+            const filtered = (window.movies || []).filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
+
             return (
-                <div className="p-4">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-10">
-                        {(window.movies || []).map(m => (
+                <div>
+                    <div className="bg-black p-8 text-center border-b border-red-900">
+                        <h1 className="text-4xl font-black text-red-600 tracking-tighter uppercase">SL CINEMA</h1>
+                        <input className="mt-6 w-full max-w-sm bg-[#111] border border-red-900 rounded-full px-6 py-3 outline-none" placeholder="සෙවීම..." onChange={(e) => setSearch(e.target.value)} />
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto p-6">
+                        {filtered.map(m => (
                             <div key={m.id} className="bubble-card p-4 rounded-2xl cursor-pointer" onClick={() => setSelected(m)}>
-                                {/* පින්තූරේ අවුලක් වුණොත් background එක පේනවා */}
-                                <img src={m.image} className="w-full h-40 object-cover rounded-xl bg-gray-800" onError={(e) => e.target.src='https://via.placeholder.com/300/000000/FFFFFF?text=No+Image'} />
+                                <img src={m.image} className="w-full h-40 object-cover rounded-xl" onError={(e) => e.target.src='https://via.placeholder.com/300'} />
                                 <h3 className="text-center mt-4 font-bold text-sm">{m.title}</h3>
                             </div>
                         ))}
                     </div>
 
-                    {selected && (
-                        <div className={`fixed inset-0 bg-black/95 flex justify-center items-center p-6 z-50 popup-overlay show`} onClick={() => setSelected(null)}>
-                            <div className="bg-[#111] p-6 rounded-3xl w-full max-w-sm border border-red-900" onClick={e => e.stopPropagation()}>
+                    <div className={`fixed inset-0 bg-black/90 flex justify-center items-center p-6 z-50 slow-popup ${selected ? 'show' : ''}`} onClick={() => setSelected(null)}>
+                        {selected && (
+                            <div className="bg-[#111] p-8 rounded-3xl w-full max-w-sm border border-red-900 shadow-2xl" onClick={e => e.stopPropagation()}>
                                 <img src={selected.image} className="w-full rounded-2xl" />
                                 <h2 className="text-2xl font-bold mt-4">{selected.title}</h2>
                                 <p className="text-gray-400 mt-2">{selected.description}</p>
-                                <button className="w-full mt-6 bg-red-600 py-3 rounded-xl font-bold" onClick={() => setSelected(null)}>close</button>
+                                {/* Slow Download Button */}
+                                <a href={selected.link} className="block w-full mt-8 bg-red-600 py-4 rounded-xl font-black text-center transition-all duration-700 hover:scale-105 hover:bg-red-700">Download Now</a>
+                                <button className="w-full mt-4 text-gray-500 hover:text-white" onClick={() => setSelected(null)}>Close</button>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             );
         }
