@@ -6,7 +6,7 @@ const movies = [
     },
     {
         "title": "Dridam (2026)",
-        "image": "https://m.media-amazon.com/images/M/MV5BNzJjZGRjMDctMzE4YS00MTM1LTk2ZDYtMjcyMDJjYWIwMjJjXkEyXkFqcGdeQXVyMTI1NDEyNTM5._V1_.jpg",
+        "image": "https://imgur.com/a/r3OxALB",
         "link": "https://google.com"
     }
 ];
