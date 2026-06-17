@@ -1,42 +1,34 @@
-<!DOCTYPE html>
-<html>
+                <!DOCTYPE html>
+<html lang="si">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { background: #0c0c0c; color: white; margin: 0; font-family: sans-serif; }
         
-        /* Loading */
         #loader { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
-        .flower { width: 40px; height: 40px; border: 4px solid #e50914; border-radius: 50%; border-top: transparent; animation: spin 1s linear infinite; }
+        .flower { width: 50px; height: 50px; border: 5px solid #e50914; border-radius: 50%; border-top: transparent; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* UI */
-        header { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
-        .search-wrapper { display: flex; justify-content: center; padding: 10px; }
-        #search-box { width: 0; padding: 10px; background: #1a1a1a; border: 1px solid #e50914; color: white; border-radius: 20px; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 25px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; }
+        .card { background: #1a1a1a; border-radius: 25px; overflow: hidden; cursor: pointer; transition: 0.5s; }
+        .card:hover { transform: scale(1.05); box-shadow: 0 0 20px #e50914; }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
         
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; }
-        .card { background: #1a1a1a; border-radius: 20px; overflow: hidden; cursor: pointer; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
-        .card:hover { transform: scale(1.08); box-shadow: 0 0 20px #e50914; }
-        .card img { width: 100%; height: 120px; object-fit: cover; }
-        
-        /* Popup */
-        #popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; opacity: 0; transition: 0.5s; }
-        .popup-box { background: #111; padding: 30px; border-radius: 30px; width: 80%; text-align: center; border: 1px solid #e50914; transform: scale(0.9); transition: 0.5s; }
-        .down-btn { display: block; background: #e50914; color: white; padding: 15px; margin-top: 20px; border-radius: 50px; text-decoration: none; transition: 0.4s; }
-        .down-btn:hover { background: #fff; color: #e50914; transform: scale(1.05); }
+        #popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; opacity: 0; transition: 0.5s; }
+        .popup-box { background: #111; padding: 35px; border-radius: 40px; width: 85%; text-align: center; border: 2px solid #e50914; transform: scale(0.9); transition: 0.5s; }
+        .down-btn { display: block; background: #e50914; color: white; padding: 20px; margin-top: 20px; border-radius: 50px; text-decoration: none; font-size: 18px; }
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="flower"></div><p style="margin-top:15px;">LOADING...</p></div>
+    <div id="loader"><div class="flower"></div><p style="margin-top:20px;">LOADING...</p></div>
 
     <header>
-        <div style="font-weight:900; color:#e50914; font-size:20px;">SL CINEMA HUB</div>
-        <div id="search-icon" style="cursor:pointer; font-size:22px;">🔍</div>
+        <div id="brand-name" style="font-weight:900; font-size:24px;"></div>
+        <div id="search-icon" style="cursor:pointer; font-size:28px;">🔍</div>
     </header>
 
-    <div class="search-wrapper"><input type="text" id="search-box" placeholder="Search..."></div>
-    
     <div class="grid" id="grid"></div>
 
     <div id="popup" onclick="closePopup()">
@@ -45,42 +37,33 @@
 
     <script src="Data.js"></script>
     <script>
-        const grid = document.getElementById('grid');
-        const box = document.getElementById('search-box');
-        const popup = document.getElementById('popup');
-        
-        document.getElementById('search-icon').onclick = () => {
-            box.style.width = box.style.width === '80%' ? '0' : '80%';
-            box.style.opacity = box.style.opacity === '1' ? '0' : '1';
-        };
+        document.getElementById('brand-name').innerText = config.title;
+        document.getElementById('brand-name').style.color = config.primaryColor;
 
-        function openPopup(m) {
-            popup.style.display = 'flex';
-            setTimeout(() => { popup.style.opacity = '1'; document.querySelector('.popup-box').style.transform = 'scale(1)'; }, 50);
-            document.getElementById('popup-inner').innerHTML = `
-                <h2>${m.title}</h2><p style="color:#aaa;">${m.desc}</p>
-                <a href="${m.link}" class="down-btn">DOWNLOAD NOW</a>
-                <div onclick="closePopup()" style="cursor:pointer; font-size:24px; margin-top:20px;">✕</div>`;
-        }
-
-        function closePopup() {
-            popup.style.opacity = '0';
-            document.querySelector('.popup-box').style.transform = 'scale(0.9)';
-            setTimeout(() => { popup.style.display = 'none'; }, 500);
-        }
-
-        function render(f = '') {
+        function render() {
+            const grid = document.getElementById('grid');
             grid.innerHTML = '';
-            movies.filter(m => m.title.toLowerCase().includes(f.toLowerCase())).forEach(m => {
+            movies.forEach(m => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.innerHTML = `<img src="${m.img}"><div style="padding:5px; font-size:10px; text-align:center;">${m.title}</div>`;
-                card.onclick = () => openPopup(m);
+                card.innerHTML = `<img src="${m.img}"><div style="padding:15px; font-size:16px; font-weight:bold; text-align:center;">${m.title}</div>`;
+                card.onclick = () => {
+                    document.getElementById('popup').style.display = 'flex';
+                    setTimeout(() => { document.getElementById('popup').style.opacity = '1'; document.querySelector('.popup-box').style.transform = 'scale(1)'; }, 50);
+                    document.getElementById('popup-inner').innerHTML = `<h2>${m.title}</h2><p style="color:#aaa;">${m.desc}</p>
+                                    <a href="${m.link}" class="down-btn">DOWNLOAD NOW</a>
+                                    <div onclick="closePopup()" style="cursor:pointer; font-size:30px; margin-top:25px;">✕</div>`;
+                };
                 grid.appendChild(card);
             });
         }
 
-        box.oninput = (e) => render(e.target.value);
+        function closePopup() {
+            document.getElementById('popup').style.opacity = '0';
+            document.querySelector('.popup-box').style.transform = 'scale(0.9)';
+            setTimeout(() => { document.getElementById('popup').style.display = 'none'; }, 500);
+        }
+
         window.onload = () => setTimeout(() => { document.getElementById('loader').style.opacity = '0'; setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 500); render(); }, 1500);
     </script>
 </body>
