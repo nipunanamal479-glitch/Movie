@@ -1,34 +1,44 @@
-                <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="si">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { background: #0c0c0c; color: white; margin: 0; font-family: sans-serif; }
         
+        /* Loading Spinner */
         #loader { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
-        .flower { width: 50px; height: 50px; border: 5px solid #e50914; border-radius: 50%; border-top: transparent; animation: spin 1s linear infinite; }
+        .flower { width: 40px; height: 40px; border: 4px solid #e50914; border-radius: 50%; border-top: transparent; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        header { display: flex; justify-content: space-between; align-items: center; padding: 25px; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; }
-        .card { background: #1a1a1a; border-radius: 25px; overflow: hidden; cursor: pointer; transition: 0.5s; }
-        .card:hover { transform: scale(1.05); box-shadow: 0 0 20px #e50914; }
-        .card img { width: 100%; height: 200px; object-fit: cover; }
+        /* Header & Search */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
+        .search-area { display: flex; justify-content: center; padding: 10px; }
+        #search-box { width: 0; padding: 12px; background: #1a1a1a; border: 1px solid #e50914; color: white; border-radius: 20px; transition: 0.7s; opacity: 0; }
         
+        /* Grid 3 */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
+        .card { background: #1a1a1a; border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.5s; }
+        .card:hover { transform: scale(1.08); box-shadow: 0 0 10px #e50914; }
+        .card img { width: 100%; height: 120px; object-fit: cover; }
+        .title { font-size: 10px; padding: 5px; text-align: center; }
+        
+        /* Popup */
         #popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; opacity: 0; transition: 0.5s; }
-        .popup-box { background: #111; padding: 35px; border-radius: 40px; width: 85%; text-align: center; border: 2px solid #e50914; transform: scale(0.9); transition: 0.5s; }
-        .down-btn { display: block; background: #e50914; color: white; padding: 20px; margin-top: 20px; border-radius: 50px; text-decoration: none; font-size: 18px; }
+        .popup-box { background: #111; padding: 30px; border-radius: 30px; width: 80%; text-align: center; border: 2px solid #e50914; transform: scale(0.9); transition: 0.5s; }
+        .down-btn { display: block; background: #e50914; padding: 15px; border-radius: 30px; color: white; text-decoration: none; margin-top: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="flower"></div><p style="margin-top:20px;">LOADING...</p></div>
+    <div id="loader"><div class="flower"></div><p style="margin-top:15px;">LOADING...</p></div>
 
     <header>
-        <div id="brand-name" style="font-weight:900; font-size:24px;"></div>
-        <div id="search-icon" style="cursor:pointer; font-size:28px;">🔍</div>
+        <div style="font-weight:900; color:#e50914; font-size:18px;">SL CINEMA HUB</div>
+        <div id="search-icon" style="cursor:pointer; font-size:20px;">🔍</div>
     </header>
 
+    <div class="search-area"><input type="text" id="search-box" placeholder="සෙවීම..."></div>
+    
     <div class="grid" id="grid"></div>
 
     <div id="popup" onclick="closePopup()">
@@ -37,34 +47,45 @@
 
     <script src="Data.js"></script>
     <script>
-        document.getElementById('brand-name').innerText = config.title;
-        document.getElementById('brand-name').style.color = config.primaryColor;
+        const grid = document.getElementById('grid');
+        const box = document.getElementById('search-box');
+        const popup = document.getElementById('popup');
 
-        function render() {
-            const grid = document.getElementById('grid');
+        // Search Toggle
+        document.getElementById('search-icon').onclick = () => {
+            box.style.width = box.style.width === '80%' ? '0' : '80%';
+            box.style.opacity = box.style.opacity === '1' ? '0' : '1';
+        };
+
+        function render(f = '') {
             grid.innerHTML = '';
-            movies.forEach(m => {
+            movies.filter(m => m.title.toLowerCase().includes(f.toLowerCase())).forEach(m => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.innerHTML = `<img src="${m.img}"><div style="padding:15px; font-size:16px; font-weight:bold; text-align:center;">${m.title}</div>`;
+                card.innerHTML = `<img src="${m.img}"><div class="title">${m.title}</div>`;
                 card.onclick = () => {
-                    document.getElementById('popup').style.display = 'flex';
-                    setTimeout(() => { document.getElementById('popup').style.opacity = '1'; document.querySelector('.popup-box').style.transform = 'scale(1)'; }, 50);
+                    popup.style.display = 'flex';
+                    setTimeout(() => { popup.style.opacity = '1'; document.querySelector('.popup-box').style.transform = 'scale(1)'; }, 10);
                     document.getElementById('popup-inner').innerHTML = `<h2>${m.title}</h2><p style="color:#aaa;">${m.desc}</p>
                                     <a href="${m.link}" class="down-btn">DOWNLOAD NOW</a>
-                                    <div onclick="closePopup()" style="cursor:pointer; font-size:30px; margin-top:25px;">✕</div>`;
+                                    <div onclick="closePopup()" style="cursor:pointer; font-size:25px; margin-top:20px;">✕</div>`;
                 };
                 grid.appendChild(card);
             });
         }
 
         function closePopup() {
-            document.getElementById('popup').style.opacity = '0';
+            popup.style.opacity = '0';
             document.querySelector('.popup-box').style.transform = 'scale(0.9)';
-            setTimeout(() => { document.getElementById('popup').style.display = 'none'; }, 500);
+            setTimeout(() => { popup.style.display = 'none'; }, 500);
         }
 
-        window.onload = () => setTimeout(() => { document.getElementById('loader').style.opacity = '0'; setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 500); render(); }, 1500);
+        box.oninput = (e) => render(e.target.value);
+
+        window.onload = () => {
+            render();
+            setTimeout(() => { document.getElementById('loader').style.opacity = '0'; setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 500); }, 1500);
+        };
     </script>
 </body>
 </html>
