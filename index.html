@@ -45,13 +45,18 @@
         <div class="popup-box" id="popup-inner" onclick="event.stopPropagation()"></div>
     </div>
 
+    <div id="dl-loader" style="display:none; position:fixed; inset:0; background:#000; z-index:200; flex-direction:column; justify-content:center; align-items:center;">
+        <div class="flower"></div>
+        <p style="margin-top:15px; color:#e50914;">PREPARING YOUR DOWNLOAD...</p>
+    </div>
+
     <script src="Data.js"></script>
     <script>
         const grid = document.getElementById('grid');
         const box = document.getElementById('search-box');
         const popup = document.getElementById('popup');
+        const dlLoader = document.getElementById('dl-loader');
 
-        // Search Toggle
         document.getElementById('search-icon').onclick = () => {
             box.style.width = box.style.width === '80%' ? '0' : '80%';
             box.style.opacity = box.style.opacity === '1' ? '0' : '1';
@@ -67,11 +72,21 @@
                     popup.style.display = 'flex';
                     setTimeout(() => { popup.style.opacity = '1'; document.querySelector('.popup-box').style.transform = 'scale(1)'; }, 10);
                     document.getElementById('popup-inner').innerHTML = `<h2>${m.title}</h2><p style="color:#aaa;">${m.desc}</p>
-                                    <a href="${m.link}" class="down-btn">DOWNLOAD NOW</a>
+                                    <div onclick="startDownload('${m.link}')" class="down-btn" style="cursor:pointer;">DOWNLOAD NOW</div>
                                     <div onclick="closePopup()" style="cursor:pointer; font-size:25px; margin-top:20px;">✕</div>`;
                 };
                 grid.appendChild(card);
             });
+        }
+
+        // Download එක එබුවම එන ලෝඩර් එක
+        function startDownload(link) {
+            closePopup();
+            dlLoader.style.display = 'flex';
+            setTimeout(() => {
+                dlLoader.style.display = 'none';
+                window.location.href = link;
+            }, 2000); // මෙතන 2000 කියන්නේ තත්පර 2යි
         }
 
         function closePopup() {
