@@ -1,109 +1,87 @@
 <!DOCTYPE html>
-<html lang="si">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>SL CINEMA PRO</title>
-    <script src="Data.js"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .flower-loader { width: 60px; height: 60px; position: relative; animation: rotate 1.5s linear infinite; }
-        .petal { position: absolute; width: 100%; height: 100%; top: 0; left: 0; }
-        .petal::after { content: ''; display: block; width: 15px; height: 15px; background: #e50914; border-radius: 50%; margin: 0 auto; box-shadow: 0 0 10px #e50914; }
-        @keyframes rotate { 100% { transform: rotate(360deg); } }
+        body { background: #0c0c0c; color: white; margin: 0; font-family: sans-serif; }
         
-        .bubble-card { 
-            background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.5s; 
-            min-height: 420px; /* කාඩ් එකේ උස */
-        }
-        .bubble-card:hover { border: 1px solid #e50914; transform: scale(1.05); }
+        /* Loading */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
+        .flower { width: 40px; height: 40px; border: 4px solid #e50914; border-radius: 50%; border-top: transparent; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Slow Bounce Popup */
-        .popup-overlay { transition: opacity 0.7s ease-in-out; opacity: 0; visibility: hidden; }
-        .popup-overlay.show { opacity: 1; visibility: visible; }
-        .popup-box { 
-            transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            transform: scale(0); 
-        }
-        .popup-box.show { transform: scale(1); }
-
-        /* Slow Download Button */
-        .btn-slow { 
-            transition: all 1.8s ease-in-out; 
-            background: #e50914; 
-        }
-        .btn-slow:hover { background: #ff0000; box-shadow: 0 0 30px #e50914; }
+        /* UI */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
+        .search-wrapper { display: flex; justify-content: center; padding: 10px; }
+        #search-box { width: 0; padding: 10px; background: #1a1a1a; border: 1px solid #e50914; color: white; border-radius: 20px; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
+        
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; }
+        .card { background: #1a1a1a; border-radius: 20px; overflow: hidden; cursor: pointer; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
+        .card:hover { transform: scale(1.08); box-shadow: 0 0 20px #e50914; }
+        .card img { width: 100%; height: 120px; object-fit: cover; }
+        
+        /* Popup */
+        #popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; opacity: 0; transition: 0.5s; }
+        .popup-box { background: #111; padding: 30px; border-radius: 30px; width: 80%; text-align: center; border: 1px solid #e50914; transform: scale(0.9); transition: 0.5s; }
+        .down-btn { display: block; background: #e50914; color: white; padding: 15px; margin-top: 20px; border-radius: 50px; text-decoration: none; transition: 0.4s; }
+        .down-btn:hover { background: #fff; color: #e50914; transform: scale(1.05); }
     </style>
 </head>
-<body class="bg-black text-white">
-    <div id="root"></div>
+<body>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <div id="loader"><div class="flower"></div><p style="margin-top:15px;">LOADING...</p></div>
 
-        function App() {
-            const [selected, setSelected] = useState(null);
-            const [showPopup, setShowPopup] = useState(false);
-            const [search, setSearch] = useState("");
-            const [loading, setLoading] = useState(true);
-            const [isOpen, setIsOpen] = useState(false);
+    <header>
+        <div style="font-weight:900; color:#e50914; font-size:20px;">SL CINEMA HUB</div>
+        <div id="search-icon" style="cursor:pointer; font-size:22px;">🔍</div>
+    </header>
 
-            useEffect(() => { setTimeout(() => setLoading(false), 1500); }, []);
+    <div class="search-wrapper"><input type="text" id="search-box" placeholder="Search..."></div>
+    
+    <div class="grid" id="grid"></div>
 
-            const openPopup = (m) => { setSelected(m); setTimeout(() => setShowPopup(true), 10); };
-            const closePopup = () => { setShowPopup(false); setTimeout(() => setSelected(null), 700); };
+    <div id="popup" onclick="closePopup()">
+        <div class="popup-box" id="popup-inner" onclick="event.stopPropagation()"></div>
+    </div>
 
-            if (loading) return (
-                <div className="h-screen flex flex-col justify-center items-center bg-black">
-                    <div className="flower-loader">
-                        {[...Array(8)].map((_, i) => <div key={i} className="petal" style={{ transform: `rotate(${i * 45}deg)` }}></div>)}
-                    </div>
-                    <p className="mt-8 text-red-600 font-bold tracking-widest">SL CINEMA LOADING...</p>
-                </div>
-            );
+    <script src="Data.js"></script>
+    <script>
+        const grid = document.getElementById('grid');
+        const box = document.getElementById('search-box');
+        const popup = document.getElementById('popup');
+        
+        document.getElementById('search-icon').onclick = () => {
+            box.style.width = box.style.width === '80%' ? '0' : '80%';
+            box.style.opacity = box.style.opacity === '1' ? '0' : '1';
+        };
 
-            const filtered = (window.movies || []).filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
-
-            return (
-                <div>
-                    <div className="bg-black p-8 border-b border-red-900 flex justify-between items-center px-10">
-                        <h1 className="text-4xl font-black text-red-600 tracking-tighter uppercase">SL CINEMA</h1>
-                        <div className="flex items-center gap-4">
-                            <input className={`bg-[#111] border border-red-900 rounded-full px-6 py-3 outline-none transition-all duration-700 ${isOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 px-0'}`} placeholder="සෙවීම..." onChange={(e) => setSearch(e.target.value)} />
-                            <button className="text-red-600 text-3xl" onClick={() => setIsOpen(!isOpen)}>🔍</button>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-10 max-w-7xl mx-auto p-12">
-                        {filtered.map(m => (
-                            <div key={m.id} className="bubble-card p-8 rounded-[2rem] cursor-pointer flex flex-col" onClick={() => openPopup(m)}>
-                                <img src={m.image} className="w-full h-72 object-cover rounded-[1.5rem]" onError={(e) => e.target.src='https://via.placeholder.com/300'} />
-                                <h3 className="text-center mt-8 font-bold text-2xl">{m.title}</h3>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className={`fixed inset-0 bg-black/95 flex justify-center items-center p-6 z-50 popup-overlay ${selected ? 'show' : ''}`} onClick={closePopup}>
-                        {selected && (
-                            <div className={`bg-[#111] p-12 rounded-[3rem] w-full max-w-lg border border-red-900 popup-box ${showPopup ? 'show' : ''}`} onClick={e => e.stopPropagation()}>
-                                <img src={selected.image} className="w-full rounded-[2rem] h-80 object-cover" />
-                                <h2 className="text-4xl font-bold mt-8">{selected.title}</h2>
-                                <p className="text-gray-400 mt-4 text-xl">{selected.description}</p>
-                                <a href={selected.link} className="btn-slow block w-full mt-12 py-6 rounded-2xl font-black text-2xl text-center">Download Now</a>
-                                <button className="w-full mt-6 text-gray-500 hover:text-white" onClick={closePopup}>Close</button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
+        function openPopup(m) {
+            popup.style.display = 'flex';
+            setTimeout(() => { popup.style.opacity = '1'; document.querySelector('.popup-box').style.transform = 'scale(1)'; }, 50);
+            document.getElementById('popup-inner').innerHTML = `
+                <h2>${m.title}</h2><p style="color:#aaa;">${m.desc}</p>
+                <a href="${m.link}" class="down-btn">DOWNLOAD NOW</a>
+                <div onclick="closePopup()" style="cursor:pointer; font-size:24px; margin-top:20px;">✕</div>`;
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        function closePopup() {
+            popup.style.opacity = '0';
+            document.querySelector('.popup-box').style.transform = 'scale(0.9)';
+            setTimeout(() => { popup.style.display = 'none'; }, 500);
+        }
+
+        function render(f = '') {
+            grid.innerHTML = '';
+            movies.filter(m => m.title.toLowerCase().includes(f.toLowerCase())).forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<img src="${m.img}"><div style="padding:5px; font-size:10px; text-align:center;">${m.title}</div>`;
+                card.onclick = () => openPopup(m);
+                grid.appendChild(card);
+            });
+        }
+
+        box.oninput = (e) => render(e.target.value);
+        window.onload = () => setTimeout(() => { document.getElementById('loader').style.opacity = '0'; setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 500); render(); }, 1500);
     </script>
 </body>
 </html>
-
